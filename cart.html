@@ -1,0 +1,86 @@
+<!-- cart.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 py-8">
+  <div class="max-w-3xl mx-auto bg-white rounded-xl p-6 shadow">
+    <h2 class="text-3xl font-bold mb-6 text-center">Your Cart</h2>
+    <div id="cart-items" class="space-y-4"></div>
+
+    <div class="mt-6 border-t pt-4 flex justify-between items-center">
+      <p class="text-xl font-semibold">Total (Selected): <span id="total-price">Rs 0.00</span></p>
+      <button onclick="clearCart()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Clear Cart</button>
+    </div>
+  </div>
+
+  <script>
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const container = document.getElementById('cart-items');
+      container.innerHTML = '';
+
+      if (cart.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500">Your cart is empty.</p>';
+        document.getElementById('total-price').textContent = 'Rs 0.00';
+        return;
+      }
+
+      cart.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between border p-4 rounded';
+
+        div.innerHTML = `
+          <div class="flex items-center space-x-4">
+            <input type="checkbox" onchange="calculateTotal()" class="item-checkbox w-5 h-5" data-price="${item.price}">
+            <a href="${item.link}">
+              <img src="${item.image}" class="w-20 h-20 object-cover rounded" />
+            </a>
+            <div>
+              <h3 class="font-semibold">${item.name}</h3>
+              <p>Rs ${item.price.toFixed(2)}</p>
+              <p class="text-sm text-gray-500">Size: Medium</p>
+            </div>
+          </div>
+          <button onclick="removeItem(${index})" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Remove</button>
+        `;
+        container.appendChild(div);
+      });
+
+      calculateTotal();
+    }
+
+    function calculateTotal() {
+      const checkboxes = document.querySelectorAll('.item-checkbox');
+      let total = 0;
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          total += parseFloat(cb.dataset.price);
+        }
+      });
+      document.getElementById('total-price').textContent = `Rs ${total.toFixed(2)}`;
+    }
+
+    function removeItem(index) {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      renderCart();
+    }
+
+    function clearCart() {
+      localStorage.removeItem('cart');
+      renderCart();
+    }
+
+    document.addEventListener('DOMContentLoaded', renderCart);
+  </script>
+</body>
+
+</html>
